@@ -1,20 +1,12 @@
-[tool.poetry]
-name = "comp520-bot"
+[project]
+name = "comp520"
 version = "0.1.0"
-description = ""
-authors = ["Sam Zhang <sam.zijing.zhang@gmail.com>"]
-license = "GNU 3.0"
+description = "Add your description here"
 readme = "README.md"
-
-[tool.poetry.dependencies]
-python = "^3.12"
-black = "^25.1.0"
-py-cord = "^2.6.1"
-python-dotenv = "^1.0.1"
-beautifulsoup4 = "^4.12.3"
-requests = "^2.32.3"
-
-
-[build-system]
-requires = ["poetry-core"]
-build-backend = "poetry.core.masonry.api"
+requires-python = ">=3.11.8"
+dependencies = [
+  "beautifulsoup4>=4.13.3",
+  "py-cord>=2.6.1",
+  "requests>=2.32.3",
+  "ruff>=0.9.4",
+]
