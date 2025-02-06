@@ -7,7 +7,7 @@ from scoreboard import SCOREBOARD_URL, get_scoreboard
 _ = load_dotenv()
 bot = discord.Bot()
 
-ALIASES = set(["Rayquaza", "Mfiti", "Haku", "Falkor"])
+ALIASES = set(["Rayquaza", "Mfiti", "Haku", "Falkor", "Klauth"])
 
 
 def handle_error(exception: Exception, ctx: discord.ApplicationContext):
