@@ -1,5 +1,7 @@
-import discord
 import os
+
+import discord
+
 from .scoreboard import SCOREBOARD_URL, get_scoreboard
 
 bot = discord.Bot()
@@ -91,4 +93,5 @@ async def scoreboard_internal_command(ctx: discord.ApplicationContext):
     await ctx.respond(embed=embed)
 
 
-bot.run(os.getenv("DISCORD_BOT_TOKEN"))
+if __name__ == "__main__":
+    bot.run(os.getenv("DISCORD_BOT_TOKEN"))
