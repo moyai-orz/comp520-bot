@@ -6,7 +6,7 @@ BRANCH=$1
 DOMAIN=$2
 
 if [[ ! -d bot ]]; then
-  git clone https://github.com/terror/bot.git
+  git clone https://github.com/moyai-orz/comp520-bot bot
 fi
 
 cd bot
