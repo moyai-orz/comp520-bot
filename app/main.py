@@ -1,10 +1,7 @@
-from doctest import debug_script
 import discord
 import os
-from dotenv import load_dotenv
-from scoreboard import SCOREBOARD_URL, get_scoreboard
+from .scoreboard import SCOREBOARD_URL, get_scoreboard
 
-_ = load_dotenv()
 bot = discord.Bot()
 
 ALIASES = set(["Rayquaza", "Mfiti", "Haku", "Falkor", "Klauth"])
@@ -63,7 +60,6 @@ async def scoreboard_command(ctx: discord.ApplicationContext):
     description="Get the current COMP520 scoreboard, restricted to only our aliases",
 )
 async def scoreboard_internal_command(ctx: discord.ApplicationContext):
-
     data = get_scoreboard()
 
     if data[0]:
