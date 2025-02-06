@@ -1,6 +1,6 @@
 import discord
 import os
-from scoreboard import SCOREBOARD_URL, get_scoreboard
+from .scoreboard import SCOREBOARD_URL, get_scoreboard
 
 bot = discord.Bot()
 
