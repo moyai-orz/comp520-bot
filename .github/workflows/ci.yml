@@ -13,14 +13,14 @@ jobs:
 
       - name: Download actionlint
         id: actionlint
-        run:
-          bash <(curl
-          https://raw.githubusercontent.com/rhysd/actionlint/main/scripts/download-actionlint.bash)
+        run: bash <(curl https://raw.githubusercontent.com/rhysd/actionlint/main/scripts/download-actionlint.bash)
 
       - name: Check workflow
         run: ${{ steps.actionlint.outputs.executable }} -color
 
   lint:
+    name: Lint
+
     runs-on: ubuntu-latest
 
     strategy:
@@ -28,7 +28,6 @@ jobs:
         python-version:
           - "3.11"
           - "3.12"
-
     steps:
       - uses: actions/checkout@v4
 
@@ -38,7 +37,10 @@ jobs:
       - name: Set up Python ${{ matrix.python-version }}
         run: uv python install ${{ matrix.python-version }}
 
-      - name: Run ruff
+      - name: Format
         run: |
           uv run ruff check .
           uv run ruff format --check .
+
+      - name: Typecheck
+        run: uv run mypy src/
