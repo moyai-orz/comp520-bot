@@ -10,7 +10,21 @@ from .update_tracker import UpdateTracker
 
 load_dotenv()
 
-ALIASES = {"Rayquaza", "Mfiti", "Haku", "Falkor", "Klauth"}
+ALIASES = {
+    "Falkor",
+    "Haku",
+    "KlauthMfiti",
+    "Rayquaza",
+}
+
+ALIAS_NAME_MAPPING = {
+    "Falkor": "Joey",
+    "Haku": "Sam",
+    "Klauth": "Izi",
+    "Mfiti": "Jeff",
+    "Rayquaza": "Liam",
+}
+
 CHECK_INTERVAL = 300
 NOTIFICATION_CHANNEL_ID = int(os.getenv("NOTIFICATION_CHANNEL_ID", "0"))
 
@@ -59,8 +73,10 @@ class ScoreboardBot(discord.Bot):
                             else f"{update.old_score} → {update.new_score}"
                         )
 
+                        name = ALIAS_NAME_MAPPING.get(update.alias) or update.alias
+
                         embed.add_field(
-                            name=update.alias,
+                            name=name,
                             value=f"[{score_text}]({update.url})",
                             inline=False,
                         )
@@ -98,7 +114,8 @@ async def scoreboard_command(ctx: discord.ApplicationContext) -> None:
             embed = discord.Embed(color=discord.Color.blurple())
 
         for alias in bot.scoreboard.aliases[i : i + 25]:
-            embed.add_field(name=alias.name, value=alias.passed_tests, inline=False)
+            name = ALIAS_NAME_MAPPING.get(alias.name) or alias.name
+            embed.add_field(name=name, value=alias.passed_tests, inline=False)
 
         embeds.append(embed)
 
@@ -122,8 +139,10 @@ async def scoreboard_internal_command(ctx: discord.ApplicationContext) -> None:
     ]
 
     for alias in tracked_aliases:
+        name = ALIAS_NAME_MAPPING.get(alias.name) or alias.name
+
         embed.add_field(
-            name=alias.name,
+            name=name,
             value=f"[{alias.passed_tests}]({alias.get_results_url(bot.scoreboard.BASE_URL)})",
             inline=False,
         )
