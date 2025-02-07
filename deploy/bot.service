@@ -6,17 +6,15 @@ StartLimitIntervalSec=10m
 
 [Service]
 AmbientCapabilities=CAP_NET_BIND_SERVICE
-Environment="PATH=/home/bot/.local/bin:/home/bot/.cache/pypoetry/virtualenvs/bin:/usr/local/bin:/usr/bin:/bin"
 Environment=PYTHONUNBUFFERED=1
 ExecStart=/home/bot/.local/bin/poetry run bot
 Group=bot
-MemoryDenyWriteExecute=false
-NoNewPrivileges=false
+MemoryDenyWriteExecute=true
+NoNewPrivileges=true
 PrivateDevices=true
-PrivateTmp=false
-ProtectHome=false
-ProtectSystem=off
-ReadWritePaths=/tmp
+PrivateTmp=true
+ProtectHome=true
+ProtectSystem=full
 Restart=on-failure
 RestartSec=5s
 StateDirectory=bot
