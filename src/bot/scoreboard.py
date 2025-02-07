@@ -1,69 +1,89 @@
-from typing import List, Optional, Tuple, TypeAlias, cast
+import typing as t
+from functools import cached_property
 
 import requests
 from bs4 import BeautifulSoup, Tag
-from requests.models import HTTPError
 
-SCOREBOARD_URL = "https://www.cs.mcgill.ca/~cs520/scoreboard/"
-
-Total: TypeAlias = int
-Passed: TypeAlias = int
-Alias: TypeAlias = str
-AliasLink: TypeAlias = Optional[str]
-PassedTests: TypeAlias = str
-GenerationTime: TypeAlias = str
-
-Scoreboard: TypeAlias = Tuple[
-    GenerationTime, List[Tuple[Alias, AliasLink, PassedTests]]
-]
+from .alias import Alias
+from .error import FetchError, ParseError
 
 
-def get_scoreboard() -> Tuple[Optional[HTTPError], Optional[Scoreboard]]:
-    headers = {
-        "Cache-Control": "no-cache, no-store, must-revalidate",
-        "Pragma": "no-cache",
-        "Expires": "0",
-    }
+class Scoreboard:
+    BASE_URL: str = "https://www.cs.mcgill.ca/~cs520/scoreboard/"
 
-    scoreboard_res = requests.get(SCOREBOARD_URL, headers=headers)
+    def __init__(self) -> None:
+        self.session = requests.Session()
 
-    if scoreboard_res.status_code != 200:
-        return HTTPError(scoreboard_res.text), None
+        self.session.headers.update(
+            {
+                "Cache-Control": "no-cache, no-store, must-revalidate",
+                "Pragma": "no-cache",
+                "Expires": "0",
+            }
+        )
 
-    soup = BeautifulSoup(scoreboard_res.text, "html.parser")
-    header = soup.find("h2", class_="page-header")
+        self._soup = self._fetch()
 
-    if not header:
-        return HTTPError("Could not find page header"), None
+    def _fetch(self) -> BeautifulSoup:
+        try:
+            res = self.session.get(self.BASE_URL)
+            res.raise_for_status()
+        except requests.RequestException as e:
+            raise FetchError(f"Failed to fetch scoreboard: {e}")
+        return BeautifulSoup(res.text, "html.parser")
 
-    next_sibling = header.find_next_sibling(string=True)
+    @cached_property
+    def generated_time(self) -> str:
+        try:
+            header = self._soup.find("h2", class_="page-header")
 
-    if not next_sibling:
-        return HTTPError("Could not find generation time"), None
+            if not header:
+                raise ParseError("Could not find page header")
 
-    generated_time = (
-        str(next_sibling).strip("() ").lstrip("generated ").rstrip().rstrip(")")
-    )
+            next_sibling = header.find_next_sibling(string=True)
 
-    result_table = soup.find("table", {"id": "resultTable"})
+            if not next_sibling:
+                raise ParseError("Could not find generation time")
 
-    if not result_table:
-        return HTTPError("Could not find result table"), None
+            return (
+                str(next_sibling).strip("() ").lstrip("generated ").rstrip().rstrip(")")
+            )
+        except Exception as e:
+            raise ParseError(f"Failed to parse generation time: {e}")
 
-    result_table = cast(Tag, result_table)
-    rows = result_table.find_all("tr")[1:]
-    results: List[Tuple[Alias, AliasLink, PassedTests]] = []
+    @cached_property
+    def aliases(self) -> list[Alias]:
+        try:
+            result_table = self._soup.find("table", {"id": "resultTable"})
 
-    for row in rows:
-        if isinstance(row, Tag):
-            cols = row.find_all("td")
-            if len(cols) == 2:
-                alias = cols[0].get_text(strip=True)
-                link = cols[0].find("a")
-                href: Optional[str] = link["href"] if link else None
-                if href:
-                    href = SCOREBOARD_URL + href
-                passed_tests = cols[1].get_text(strip=True)
-                results.append((alias, href, passed_tests))
+            if not result_table:
+                raise ParseError("Could not find result table")
 
-    return None, (generated_time, results)
+            result_table = t.cast(Tag, result_table)
+            rows = result_table.find_all("tr")[1:]
+            aliases: list[Alias] = []
+
+            for row in rows:
+                if isinstance(row, Tag):
+                    cols = row.find_all("td")
+                    if len(cols) == 2:
+                        name = cols[0].get_text(strip=True)
+                        link = cols[0].find("a")
+                        href: t.Optional[str] = link["href"] if link else None
+                        if href:
+                            href = self.BASE_URL + href
+                        passed_tests = cols[1].get_text(strip=True)
+                        aliases.append(Alias(name, href, passed_tests))
+
+            return aliases
+        except Exception as e:
+            raise ParseError(f"Failed to parse aliases: {e}")
+
+    def refresh(self) -> None:
+        if "generated_time" in self.__dict__:
+            del self.__dict__["generated_time"]
+
+        if "aliases" in self.__dict__:
+            del self.__dict__["aliases"]
+
+        self._soup = self._fetch()
