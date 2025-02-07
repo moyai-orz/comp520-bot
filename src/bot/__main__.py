@@ -1,4 +1,5 @@
 import os
+from typing import List
 
 import discord
 from dotenv import load_dotenv
@@ -6,25 +7,23 @@ from dotenv import load_dotenv
 from .scoreboard import SCOREBOARD_URL, get_scoreboard
 
 load_dotenv()
-
 bot = discord.Bot()
 
-ALIASES = set(["Rayquaza", "Mfiti", "Haku", "Falkor", "Klauth"])
+ALIASES = {"Rayquaza", "Mfiti", "Haku", "Falkor", "Klauth"}
 
 
-def handle_error(exception: Exception, ctx: discord.ApplicationContext):
+def handle_error(exception: Exception, ctx: discord.ApplicationContext) -> None:
     ctx.respond(exception)
 
 
 @bot.event
-async def on_ready():
+async def on_ready() -> None:
     print(f"{bot.user} is ready and online!")
 
 
 @bot.slash_command(name="scoreboard", description="Get the current COMP520 scoreboard")
-async def scoreboard_command(ctx: discord.ApplicationContext):
+async def scoreboard_command(ctx: discord.ApplicationContext) -> None:
     """Fetch and display the current COMP520 scoreboard."""
-
     data = get_scoreboard()
 
     if data[0]:
@@ -38,8 +37,7 @@ async def scoreboard_command(ctx: discord.ApplicationContext):
 
     generated_time = data[1][0]
     fields = data[1][1]
-
-    embeds = []
+    embeds: List[discord.Embed] = []
 
     for i in range(0, len(fields), 25):
         if len(embeds) == 0:
@@ -52,7 +50,7 @@ async def scoreboard_command(ctx: discord.ApplicationContext):
         else:
             embed = discord.Embed(color=discord.Color.blurple())
 
-        for alias, url, result in fields[i : i + 25]:
+        for alias, _, result in fields[i : i + 25]:
             embed.add_field(name=alias, value=f"{result}", inline=False)
 
         embeds.append(embed)
@@ -64,7 +62,7 @@ async def scoreboard_command(ctx: discord.ApplicationContext):
     name="scoreboard_internal",
     description="Get the current COMP520 scoreboard, restricted to only our aliases",
 )
-async def scoreboard_internal_command(ctx: discord.ApplicationContext):
+async def scoreboard_internal_command(ctx: discord.ApplicationContext) -> None:
     data = get_scoreboard()
 
     if data[0]:
@@ -76,25 +74,22 @@ async def scoreboard_internal_command(ctx: discord.ApplicationContext):
         await ctx.respond("No scoreboard data available.", ephemeral=True)
         return
 
-    generated_time = data[1][0]
-    fields = data[1][1]
+    generated_time, fields = data[1]
 
-    for i in range(len(fields)):
-        embed = discord.Embed(
-            title="COMP520 Scoreboard",
-            description=f"Generated at {generated_time}",
-            url=SCOREBOARD_URL,
-            color=discord.Color.blurple(),
-        )
+    embed: discord.Embed = discord.Embed(
+        title="COMP520 Scoreboard",
+        description=f"Generated at {generated_time}",
+        url=SCOREBOARD_URL,
+        color=discord.Color.blurple(),
+    )
 
-        for alias, url, result in fields:
-            if alias not in ALIASES:
-                continue
-
-            embed.add_field(name=alias, value=f"[{result}]({url})", inline=False)
+    for alias, url, result in fields:
+        if alias not in ALIASES:
+            continue
+        embed.add_field(name=alias, value=f"[{result}]({url})", inline=False)
 
     await ctx.respond(embed=embed)
 
 
-def main():
+def main() -> None:
     bot.run(os.getenv("DISCORD_BOT_TOKEN"))

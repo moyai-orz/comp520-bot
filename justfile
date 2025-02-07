@@ -1,5 +1,6 @@
 set dotenv-load
 
+alias c := check
 alias d := deploy
 alias f := fmt
 alias r := run
@@ -7,8 +8,11 @@ alias r := run
 default:
   just --list
 
+check:
+  ruff check --select I --fix && uv run mypy src
+
 fmt:
-  ruff check --select I --fix && ruff format
+  ruff format
 
 deploy branch='main' domain='173.255.231.30':
   ssh root@{{domain}} "mkdir -p deploy \

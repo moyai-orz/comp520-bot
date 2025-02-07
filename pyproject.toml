@@ -29,3 +29,15 @@ packages = [ { include = "bot", from = "src" } ]
 
 [tool.poetry.scripts]
 bot = "bot.__main__:main"
+
+[tool.mypy]
+mypy_path = "src"
+explicit_package_bases = true
+namespace_packages = true
+
+[dependency-groups]
+dev = [
+    "mypy>=1.15.0",
+    "types-beautifulsoup4>=4.12.0.20250204",
+    "types-requests>=2.32.0.20241016",
+]

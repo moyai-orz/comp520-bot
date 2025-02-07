@@ -28,6 +28,8 @@ jobs:
         run: ${{ steps.actionlint.outputs.executable }} -color
 
   deploy:
+    name: Deploy
+
     runs-on: ubuntu-latest
 
     steps:
