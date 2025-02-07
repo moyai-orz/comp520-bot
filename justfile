@@ -19,4 +19,4 @@ deploy branch='main' domain='173.255.231.30':
   ssh root@{{domain}} 'cd deploy && ./checkout {{branch}} {{domain}}'
 
 run:
-  uv run app/main.py
+  uv run bot

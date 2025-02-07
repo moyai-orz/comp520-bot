@@ -1,9 +1,9 @@
 import os
 
 import discord
-
-from scoreboard import SCOREBOARD_URL, get_scoreboard
 from dotenv import load_dotenv
+
+from .scoreboard import SCOREBOARD_URL, get_scoreboard
 
 load_dotenv()
 
@@ -96,4 +96,5 @@ async def scoreboard_internal_command(ctx: discord.ApplicationContext):
     await ctx.respond(embed=embed)
 
 
-bot.run(os.getenv("DISCORD_BOT_TOKEN"))
+def main():
+    bot.run(os.getenv("DISCORD_BOT_TOKEN"))

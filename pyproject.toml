@@ -11,3 +11,21 @@ dependencies = [
   "requests>=2.32.3",
   "ruff>=0.9.4",
 ]
+
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
+
+[project.scripts]
+bot = "bot.__main__:main"
+
+[tool.hatch.build.targets.wheel]
+packages = ["src/bot"]
+
+[tool.poetry]
+name = "bot"
+version = "0.0.0"
+packages = [ { include = "bot", from = "src" } ]
+
+[tool.poetry.scripts]
+bot = "bot.__main__:main"

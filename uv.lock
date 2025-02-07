@@ -169,7 +169,7 @@ wheels = [
 [[package]]
 name = "comp520-bot"
 version = "0.0.0"
-source = { virtual = "." }
+source = { editable = "." }
 dependencies = [
     { name = "beautifulsoup4" },
     { name = "py-cord" },
