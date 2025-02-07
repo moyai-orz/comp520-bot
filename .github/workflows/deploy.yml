@@ -10,6 +10,23 @@ defaults:
     shell: bash
 
 jobs:
+  check-workflow:
+    name: Check
+
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Download actionlint
+        id: actionlint
+        run:
+          bash <(curl
+          https://raw.githubusercontent.com/rhysd/actionlint/main/scripts/download-actionlint.bash)
+
+      - name: Check workflow
+        run: ${{ steps.actionlint.outputs.executable }} -color
+
   deploy:
     runs-on: ubuntu-latest
 
