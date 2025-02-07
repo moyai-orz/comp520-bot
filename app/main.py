@@ -1,6 +1,11 @@
-import discord
 import os
-from .scoreboard import SCOREBOARD_URL, get_scoreboard
+
+import discord
+
+from scoreboard import SCOREBOARD_URL, get_scoreboard
+from dotenv import load_dotenv
+
+load_dotenv()
 
 bot = discord.Bot()
 

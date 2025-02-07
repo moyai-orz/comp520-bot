@@ -1,12 +1,13 @@
 [project]
-name = "comp520"
-version = "0.1.0"
-description = "Add your description here"
+name = "comp520-bot"
+version = "0.0.0"
+description = "Discord bot for Discord bot for retrieving and displaying COMP520 test results from online testers"
 readme = "README.md"
 requires-python = ">=3.11.8"
 dependencies = [
   "beautifulsoup4>=4.13.3",
   "py-cord>=2.6.1",
+  "python-dotenv>=1.0.1",
   "requests>=2.32.3",
   "ruff>=0.9.4",
 ]
