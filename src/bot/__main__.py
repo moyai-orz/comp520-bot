@@ -13,7 +13,8 @@ load_dotenv()
 ALIASES = {
     "Falkor",
     "Haku",
-    "KlauthMfiti",
+    "Klauth",
+    "Mfiti",
     "Rayquaza",
 }
 
