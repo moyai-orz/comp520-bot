@@ -5,6 +5,7 @@ set -euxo pipefail
 touch ~/.hushlogin
 
 DOMAIN=$1
+WORKING_DIR="/var/lib/bot"
 
 hostnamectl set-hostname "$DOMAIN"
 
@@ -14,29 +15,24 @@ apt-get update && apt-get install --yes \
   libsqlite3-dev \
   libssl-dev \
   pkg-config \
-  vim \
-  python3-pip
+  vim
 
-sudo -u bot -s -- bash -c "curl -sSL https://install.python-poetry.org | python3 -"
-
-POETRY_HOME="/home/bot/.local/bin"
-echo "export PATH=\"$POETRY_HOME:$PATH\"" | sudo -u bot tee -a /home/bot/.bashrc
-
+# Create the `bot` user
 if ! id bot &>/dev/null; then
   useradd --system --create-home --home-dir /home/bot --shell /bin/bash bot
 fi
 
-mkdir -p /home/bot
-chown bot:bot /home/bot
-chmod 755 /home/bot
+# Install `poetry`
+sudo -u bot -s -- bash -c "curl -sSL https://install.python-poetry.org | python3 -"
 
-cp -r . /var/lib/bot
-chown -R bot:bot /var/lib/bot
+# Copy over project
+cp -r . "$WORKING_DIR"
 
-sudo -u bot -s -- bash -c "cd /var/lib/bot && /home/bot/.local/bin/poetry install --no-root"
+# Install dependencies
+sudo -u bot -s -- bash -c "cd \"$WORKING_DIR\" && /home/bot/.local/bin/poetry install --no-root"
 
+# Start systemd service
 cp deploy/bot.service /etc/systemd/system/
-
 systemctl daemon-reload
 systemctl enable bot
 systemctl restart bot
