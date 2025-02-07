@@ -19,6 +19,9 @@ apt-get install --yes \
 # Install `uv`
 curl -LsSf https://astral.sh/uv/install.sh | sh
 
+# Reload the shell to recognize `uv`
+exec $SHELL
+
 cp deploy/bot.service /etc/systemd/system/
 
 systemctl daemon-reload
