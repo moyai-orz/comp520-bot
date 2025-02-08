@@ -58,6 +58,7 @@ class UpdateTracker:
             print(f"Error saving state file: {e}")
 
     def check_updates(self) -> list[Update]:
+        self._save_state();
         self.scoreboard.refresh()
 
         if self.scoreboard.generated_time == self.previous_time:
