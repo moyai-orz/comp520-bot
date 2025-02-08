@@ -68,11 +68,28 @@ class ScoreboardBot(discord.Bot):
                     )
 
                     for update in sorted_updates:
+                        old_score = (
+                            update.old_score.split("/")[0] if update.old_score else None
+                        )
+                        new_score = update.new_score.split("/")[0]
+
+                        diff = 0
+                        if old_score is not None:
+                            diff = int(new_score) - int(old_score)
+
+                        diff_text = (
+                            f" (+{diff})"
+                            if diff > 0
+                            else f" ({diff})"
+                            if diff < 0
+                            else " (+0)"
+                        )
+
                         score_text = (
-                            f"{update.new_score}"
+                            f"{update.new_score}{diff_text}"
                             if update.old_score is None
                             or update.old_score == update.new_score
-                            else f"{update.old_score} → {update.new_score}"
+                            else f"{update.old_score} → {update.new_score}{diff_text}"
                         )
 
                         name = ALIAS_NAME_MAPPING.get(update.alias) or update.alias
