@@ -71,7 +71,7 @@ class ScoreboardBot(discord.Bot):
                         score_text = (
                             f"{update.new_score}"
                             if update.old_score is None
-                            and update.old_score != update.new_score
+                            or update.old_score == update.new_score
                             else f"{update.old_score} → {update.new_score}"
                         )
 
