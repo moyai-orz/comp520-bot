@@ -90,7 +90,7 @@ class ScoreboardBot(discord.Bot):
                             f"{update.new_score}{diff_text}"
                             if update.old_score is None
                             or update.old_score == update.new_score
-                            else f"{update.old_score} → {update.new_score}{diff_text}"
+                            else f"{update.new_score}{diff_text} ← {update.old_score}"
                         )
 
                         name = ALIAS_NAME_MAPPING.get(update.alias) or update.alias
