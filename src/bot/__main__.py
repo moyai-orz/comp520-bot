@@ -3,6 +3,7 @@ import os
 
 import discord
 from dotenv import load_dotenv
+from datetime import datetime
 
 from .error import ScoreboardError
 from .scoreboard import Scoreboard
@@ -37,6 +38,9 @@ class ScoreboardBot(discord.Bot):
         self.update_tracker = UpdateTracker(self.scoreboard, ALIASES)
         self.check_task: asyncio.Task | None = None
 
+    def format_generation_time(self, dt: datetime) -> str:
+        return dt.strftime("%B %d, %Y - %I:%M %p").replace(" 0", " ")
+
     async def start_periodic_check(self) -> None:
         if self.check_task is not None:
             self.check_task.cancel()
@@ -56,7 +60,7 @@ class ScoreboardBot(discord.Bot):
                 if updates:
                     embed = discord.Embed(
                         title="COMP520 Scoreboard Updates",
-                        description=f"Generated at {self.scoreboard.generated_time}",
+                        description=f"Generated on {self.format_generation_time(self.scoreboard.generated_time)}",
                         url=self.scoreboard.BASE_URL,
                         color=discord.Color.blurple(),
                     )
@@ -104,7 +108,7 @@ class ScoreboardBot(discord.Bot):
                     await channel.send(embed=embed)
             except ScoreboardError as e:
                 print(f"Error in periodic check: {e}")
-                self.update_tracker.previous_time = None
+                self.update_tracker.state.generated_time = None
 
             await asyncio.sleep(CHECK_INTERVAL)
 
@@ -127,7 +131,7 @@ async def scoreboard_command(ctx: discord.ApplicationContext) -> None:
             embed = discord.Embed(
                 title="COMP520 Scoreboard",
                 url=bot.scoreboard.BASE_URL,
-                description=f"Generated at {bot.scoreboard.generated_time}",
+                description=f"Generated on {bot.format_generation_time(bot.scoreboard.generated_time)}",
                 color=discord.Color.blurple(),
             )
         else:
@@ -149,7 +153,7 @@ async def scoreboard_command(ctx: discord.ApplicationContext) -> None:
 async def scoreboard_internal_command(ctx: discord.ApplicationContext) -> None:
     embed = discord.Embed(
         title="COMP520 Scoreboard",
-        description=f"Generated at {bot.scoreboard.generated_time}",
+        description=f"Generated on {bot.format_generation_time(bot.scoreboard.generated_time)}",
         url=bot.scoreboard.BASE_URL,
         color=discord.Color.blurple(),
     )

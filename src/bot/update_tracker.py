@@ -1,6 +1,8 @@
 import json
 from dataclasses import dataclass
+from datetime import datetime
 from pathlib import Path
+from typing import Optional, Dict
 
 from .scoreboard import Scoreboard
 
@@ -9,8 +11,30 @@ from .scoreboard import Scoreboard
 class Update:
     alias: str
     new_score: str
-    old_score: str | None
+    old_score: Optional[str]
     url: str
+
+
+@dataclass
+class State:
+    generated_time: Optional[datetime]
+    scores: Dict[str, str]
+
+    @classmethod
+    def from_dict(cls, data: dict, time_format: str) -> "State":
+        time_str = data.get("generated_time")
+        generated_time = datetime.strptime(time_str, time_format) if time_str else None
+        return cls(generated_time=generated_time, scores=data.get("scores", {}))
+
+    def to_dict(self, time_format: str) -> dict:
+        return {
+            "generated_time": (
+                self.generated_time.strftime(time_format)
+                if self.generated_time
+                else None
+            ),
+            "scores": self.scores,
+        }
 
 
 class UpdateTracker:
@@ -23,44 +47,43 @@ class UpdateTracker:
         self.scoreboard = scoreboard
         self.tracked_aliases = tracked_aliases
         self.state_file = Path(state_file)
-        self._load_state()
+        self.state = self._load_state()
 
-    def _load_state(self) -> None:
-        self.previous_time = None
-        self.previous_scores = {}
-
+    def _load_state(self) -> State:
         if not self.state_file.exists():
-            return
+            return State(generated_time=None, scores={})
 
         try:
-            with open(self.state_file, "r") as f:
-                state = json.load(f)
-                self.previous_time = state.get("generated_time")
-                self.previous_scores = state.get("scores", {})
+            with open(self.state_file) as f:
+                data = json.load(f)
+            return State.from_dict(data, self.scoreboard.TIME_FORMAT)
         except (json.JSONDecodeError, OSError) as e:
-            print(f"Error loading state file: {e}")
+            print(f"Failed to load state file: {e}")
+            return State(generated_time=None, scores={})
 
     def _save_state(self) -> None:
         try:
-            state = {
-                "generated_time": self.previous_time,
-                "scores": self.previous_scores,
-            }
-
             self.state_file.parent.mkdir(parents=True, exist_ok=True)
 
             temp_file = self.state_file.with_suffix(".tmp")
+            state_dict = self.state.to_dict(self.scoreboard.TIME_FORMAT)
+
             with open(temp_file, "w") as f:
-                json.dump(state, f, indent=2)
+                json.dump(state_dict, f, indent=2)
 
             temp_file.replace(self.state_file)
         except OSError as e:
-            print(f"Error saving state file: {e}")
+            print(f"Failed to save state file: {e}")
 
     def check_updates(self) -> list[Update]:
         self.scoreboard.refresh()
 
-        if self.scoreboard.generated_time == self.previous_time:
+        current_time = self.scoreboard.generated_time
+
+        if (
+            self.state.generated_time is not None
+            and current_time <= self.state.generated_time
+        ):
             return []
 
         current_scores = {
@@ -74,15 +97,15 @@ class UpdateTracker:
                 updates.append(
                     Update(
                         alias=alias,
-                        old_score=self.previous_scores.get(alias),
+                        old_score=self.state.scores.get(alias),
                         new_score=current_scores[alias],
                         url=f"{self.scoreboard.BASE_URL}{alias}_results.html",
                     )
                 )
 
-                self.previous_scores[alias] = current_scores[alias]
+                self.state.scores[alias] = current_scores[alias]
 
-        self.previous_time = self.scoreboard.generated_time
+        self.state.generated_time = current_time
         self._save_state()
 
         return updates

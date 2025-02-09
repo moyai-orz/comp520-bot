@@ -1,4 +1,5 @@
 import typing as t
+from datetime import datetime
 from functools import cached_property
 
 import requests
@@ -10,6 +11,7 @@ from .error import FetchError, ParseError
 
 class Scoreboard:
     BASE_URL: str = "https://www.cs.mcgill.ca/~cs520/scoreboard/"
+    TIME_FORMAT: str = "%d/%m/%Y %H:%M:%S"
 
     def __init__(self) -> None:
         self.session = requests.Session()
@@ -33,7 +35,7 @@ class Scoreboard:
         return BeautifulSoup(res.text, "html.parser")
 
     @cached_property
-    def generated_time(self) -> str:
+    def generated_time(self) -> datetime:
         try:
             header = self._soup.find("h2", class_="page-header")
 
@@ -45,8 +47,13 @@ class Scoreboard:
             if not next_sibling:
                 raise ParseError("Could not find generation time")
 
-            return (
-                str(next_sibling).strip("() ").lstrip("generated ").rstrip().rstrip(")")
+            return datetime.strptime(
+                str(next_sibling)
+                .strip("() ")
+                .lstrip("generated ")
+                .rstrip()
+                .rstrip(")"),
+                self.TIME_FORMAT,
             )
         except Exception as e:
             raise ParseError(f"Failed to parse generation time: {e}")
@@ -80,10 +87,9 @@ class Scoreboard:
             raise ParseError(f"Failed to parse aliases: {e}")
 
     def refresh(self) -> None:
-        if "generated_time" in self.__dict__:
-            del self.__dict__["generated_time"]
+        properties = ["generated_time", "aliases"]
 
-        if "aliases" in self.__dict__:
-            del self.__dict__["aliases"]
+        for property in properties:
+            del self.__dict__[property]
 
         self._soup = self._fetch()
