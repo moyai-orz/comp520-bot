@@ -81,7 +81,9 @@ class ScoreboardBot(discord.Bot):
                         diff_text = (
                             f" (+{diff})"
                             if diff > 0
-                            else f" ({diff})" if diff < 0 else " (+0)"
+                            else f" ({diff})"
+                            if diff < 0
+                            else " (+0)"
                         )
 
                         score_text = (
