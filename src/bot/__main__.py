@@ -55,9 +55,10 @@ class ScoreboardBot(discord.Bot):
 
                 if updates:
                     embed = discord.Embed(
-                        title="Scoreboard Updates",
+                        title="COMP520 Scoreboard Updates",
                         description=f"Generated at {self.scoreboard.generated_time}",
                         url=self.scoreboard.BASE_URL,
+                        color=discord.Color.blurple(),
                     )
 
                     sorted_updates = sorted(
