@@ -73,8 +73,7 @@ class Scoreboard:
                         if href:
                             href = self.BASE_URL + href
                         passed_tests = cols[1].get_text(strip=True)
-                        hash = self.fetch_commit_hash(href)
-
+                        hash = self.fetch_commit_hash(href) if href else ""
                         aliases.append(Alias(name, href, passed_tests, hash))
 
             return aliases
@@ -87,11 +86,11 @@ class Scoreboard:
             res.raise_for_status()
             soup = BeautifulSoup(res.text, "html.parser")
             tbody = (
-                soup.find("html").find("body").find("div").find("table").find("tbody")
+                soup.find("html").find("body").find("div").find("table").find("tbody")  # type: ignore
             )
             if not tbody:
                 raise ParseError("Could not find tbody in alias details")
-            rows = tbody.find_all("tr")
+            rows = tbody.find_all("tr")  # type: ignore
             if len(rows) < 3:
                 raise ParseError("Not enough rows in tbody")
             cols = rows[2].find_all("td")
