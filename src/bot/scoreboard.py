@@ -68,13 +68,11 @@ class Scoreboard:
                     cols = row.find_all("td")
                     if len(cols) == 2:
                         name = cols[0].get_text(strip=True)
-
                         link = cols[0].find("a")
                         href: t.Optional[str] = link["href"] if link else None
                         if href:
                             href = self.BASE_URL + href
                         passed_tests = cols[1].get_text(strip=True)
-
                         hash = self.fetch_commit_hash(href)
 
                         aliases.append(Alias(name, href, passed_tests, hash))
