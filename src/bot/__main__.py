@@ -135,6 +135,9 @@ async def scoreboard_command(ctx: discord.ApplicationContext) -> None:
 
         for alias in bot.scoreboard.aliases[i : i + 25]:
             name = ALIAS_NAME_MAPPING.get(alias.name) or alias.name
+            if alias.hash:
+                name = f"{name} ({alias.hash})"
+
             embed.add_field(name=name, value=alias.passed_tests, inline=False)
 
         embeds.append(embed)
@@ -160,6 +163,8 @@ async def scoreboard_internal_command(ctx: discord.ApplicationContext) -> None:
 
     for alias in tracked_aliases:
         name = ALIAS_NAME_MAPPING.get(alias.name) or alias.name
+        if alias.hash:
+            name = f"{name} ({alias.hash})"
 
         embed.add_field(
             name=name,
