@@ -7,6 +7,7 @@ class Alias:
     name: str
     link: t.Optional[str]
     passed_tests: str
+    hash: str
 
     def get_results_url(self, base_url: str) -> str:
         return f"{base_url}{self.name}_results.html"

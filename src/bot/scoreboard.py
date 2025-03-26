@@ -73,11 +73,32 @@ class Scoreboard:
                         if href:
                             href = self.BASE_URL + href
                         passed_tests = cols[1].get_text(strip=True)
-                        aliases.append(Alias(name, href, passed_tests))
+                        hash = self.fetch_commit_hash(href) if href else ""
+                        aliases.append(Alias(name, href, passed_tests, hash))
 
             return aliases
         except Exception as e:
             raise ParseError(f"Failed to parse aliases: {e}")
+
+    def fetch_commit_hash(self, href: str) -> str:
+        try:
+            res = self.session.get(href)
+            res.raise_for_status()
+            soup = BeautifulSoup(res.text, "html.parser")
+            tbody = (
+                soup.find("html").find("body").find("div").find("table").find("tbody")  # type: ignore
+            )
+            if not tbody:
+                raise ParseError("Could not find tbody in alias details")
+            rows = tbody.find_all("tr")  # type: ignore
+            if len(rows) < 3:
+                raise ParseError("Not enough rows in tbody")
+            cols = rows[2].find_all("td")
+            if len(cols) < 2:
+                raise ParseError("Not enough columns in third row")
+            return cols[1].get_text(strip=True)
+        except Exception as e:
+            raise ParseError(f"Failed to fetch commit hash: {e}")
 
     def refresh(self) -> None:
         if "generated_time" in self.__dict__:
