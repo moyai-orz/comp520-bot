@@ -9,10 +9,10 @@ default:
   just --list
 
 check:
-  ruff check --select I --fix && uv run mypy src
+  uv run ruff check --select I --fix && uv run mypy src
 
 fmt:
-  ruff format
+  uv run ruff format
 
 deploy branch='main' domain='173.255.231.30':
   ssh root@{{domain}} "mkdir -p deploy \
