@@ -90,16 +90,16 @@ class Scoreboard:
                 soup.find("html").find("body").find("div").find("table").find("tbody")
             )
             if not tbody:
-                return ""
+                raise ParseError("Could not find tbody in alias details")
             rows = tbody.find_all("tr")
             if len(rows) < 3:
-                return ""
+                raise ParseError("Not enough rows in tbody")
             cols = rows[2].find_all("td")
             if len(cols) < 2:
-                return ""
+                raise ParseError("Not enough columns in third row")
             return cols[1].get_text(strip=True)
-        except Exception:
-            return ""
+        except Exception as e:
+            raise ParseError(f"Failed to fetch commit hash: {e}")
 
     def refresh(self) -> None:
         if "generated_time" in self.__dict__:
